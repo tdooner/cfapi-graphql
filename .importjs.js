@@ -10,4 +10,8 @@ module.exports = {
       'Mutation',
     ],
   },
+  environments: [
+    'node',
+    'browser',
+  ],
 };

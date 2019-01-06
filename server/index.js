@@ -1,54 +1,19 @@
-const { Sequelize } = require('sequelize');
+const { ApolloServer } = require('apollo-server');
+const github = require('octonode');
 
-const { ApolloServer, gql } = require('apollo-server');
-
+const { Brigade, Session, User, db } = require('../db');
 const graphqlApiDefinition = require('../graphql-api-definition');
 
-/*
- * Models and stuff
- */
-const db = new Sequelize('cfapi-graphql', null, null, {
-  dialect: 'sqlite',
-  storage: 'cfapi-graphql.sqlite3',
-});
-
-const User = db.define('user', {
-  // TODO: Store non-primary email addresses in here too!
-  email: { type: Sequelize.STRING },
-  github_access_token: { type: Sequelize.STRING },
-  github_access_token_timestamp: { type: Sequelize.DATE },
-}, {
-  underscored: true,
-  indexes: [
-    { unique: true, fields: ['email'] },
-  ],
-});
-
-const Session = db.define('session', {
-  uuid: { type: Sequelize.UUID, defaultValue: Sequelize.UUIDV4 },
-}, {
-  underscored: true,
-  indexes: [
-    { unique: true, fields: ['uuid'] },
-  ],
-});
-
-User.hasMany(Session);
-
-
-
-const github = require('octonode');
 github.auth.config({
   id: process.env.GITHUB_OAUTH_CLIENT_ID,
   secret: process.env.GITHUB_OAUTH_CLIENT_SECRET,
 });
 
-
 // Resolvers define the technique for fetching the types in the
 // schema.  We'll retrieve books from the "books" array above.
 const resolvers = {
   Query: {
-
+    listBrigades: () => Brigade.findAll(),
   },
 
   Mutation: {
@@ -60,7 +25,6 @@ const resolvers = {
           const githubClient = github.client(token);
           githubClient.me().emails((err2, body) => {
             const primaryEmail = body.find(e => e.primary).email;
-
             console.log('creating user with email:', primaryEmail);
             User.findOrCreate({ where: { email: primaryEmail } }).spread((user) => {
               user.update({
