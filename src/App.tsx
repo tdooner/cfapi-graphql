@@ -1,27 +1,34 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import ClientOAuth2 from 'client-oauth2';
-import './App.css';
+import { Route, Router } from 'react-router-dom';
+import React from 'react';
+import queryString from 'query-string';
 
-const githubAuth = new ClientOAuth2({
-  clientId: '910420dba3f7db2cc4e0',
-  authorizationUri: 'https://github.com/login/oauth/authorize',
-  redirectUri: 'http://localhost:3000/oauth/callback',
-  scopes: ['user:email'],
-});
+import createBrowserHistory from 'history/createBrowserHistory';
 
-class App extends Component {
-  handleLoginClick() {
-    window.location.href = githubAuth.token.getUri();
+import HomePage from './pages/HomePage';
+import OAuthCallback from './pages/OAuthCallback';
+
+const history = createBrowserHistory();
+
+const getCodeFromQueryString = () => {
+  // todo: handle errors here
+  const parsed = queryString.parse(location.search);
+
+  if (Array.isArray(parsed.code)) {
+    return parsed.code[0];
+  } else {
+    return parsed.code;
   }
+};
 
-  render() {
-    return (
-      <div className="App">
-        <a href='#' onClick={this.handleLoginClick}>Log in with oauth</a>
+export default function App() {
+  return (
+    <Router history={history}>
+      <div>
+        <Route exact path="/oauth/callback" render={props => (
+          <OAuthCallback code={getCodeFromQueryString()} />
+        )} />
+        <Route exact path="/" component={HomePage} />
       </div>
-    );
-  }
-}
-
-export default App;
+    </Router>
+  );
+};
