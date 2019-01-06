@@ -1,7 +1,13 @@
 module.exports = {
+  aliases: {
+    gql: 'graphql-tag',
+  },
   namedExports: {
     react: [
-      'Component'
+      'Component',
+    ],
+    'react-apollo': [
+      'Mutation',
     ],
   },
 };

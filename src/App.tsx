@@ -1,10 +1,11 @@
 import { ApolloClient, HttpLink, InMemoryCache } from 'apollo-boost';
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider, Mutation } from 'react-apollo';
 import { Route, Router } from 'react-router-dom';
 import React from 'react';
 import queryString from 'query-string';
 
 import createBrowserHistory from 'history/createBrowserHistory';
+import gql from 'graphql-tag';
 
 import HomePage from './pages/HomePage';
 import OAuthCallback from './pages/OAuthCallback';
@@ -23,17 +24,33 @@ const getCodeFromQueryString = () => {
 };
 
 const client = new ApolloClient({
-  link: new HttpLink({ uri: 'http://localhost:3000/graphql' }),
+  link: new HttpLink({ uri: 'http://localhost:4000/graphql' }),
   cache: new InMemoryCache(),
 });
+
+const createSessionMutation = gql`
+mutation CreateSession($githubCode: String) {
+  createSession(githubCode: $githubCode) {
+    uuid
+  }
+}
+`;
 
 export default function App() {
   return (
     <Router history={history}>
       <ApolloProvider client={client}>
         <Route exact path="/oauth/callback" render={props => (
-          <OAuthCallback code={getCodeFromQueryString()} />
+          <Mutation mutation={createSessionMutation}>
+            {(createSession, { data }) => (
+              <OAuthCallback
+                handleCodeReceived={createSession}
+                code={getCodeFromQueryString()}
+              />
+            )}
+          </Mutation>
         )} />
+
         <Route exact path="/" component={HomePage} />
       </ApolloProvider>
     </Router>
