@@ -6,7 +6,7 @@ import './App.css';
 const githubAuth = new ClientOAuth2({
   clientId: '910420dba3f7db2cc4e0',
   authorizationUri: 'https://github.com/login/oauth/authorize',
-  redirectUri: 'http://localhost/oauth/callback',
+  redirectUri: 'http://localhost:3000/oauth/callback',
   scopes: ['user:email'],
 });
 
