@@ -7,6 +7,7 @@ module.exports = {
       'Component',
     ],
     'react-apollo': [
+      'Query',
       'Mutation',
     ],
   },
