@@ -13,6 +13,10 @@ github.auth.config({
 // schema.  We'll retrieve books from the "books" array above.
 const resolvers = {
   Query: {
+    currentUser: (_, { sessionId }) => Session
+      .findOne({ where: { uuid: sessionId } })
+      .then(session => session && session.getUser())
+      .then(user => user),
     listBrigades: () => Brigade.findAll(),
   },
 
@@ -21,9 +25,17 @@ const resolvers = {
       console.log('code: ', githubCode);
       return new Promise((resolve) => {
         github.auth.login(githubCode, (err, token) => {
+          if (err) {
+            console.error('error logging in', err.message);
+            return;
+          }
           console.log('got access token: ', token);
           const githubClient = github.client(token);
           githubClient.me().emails((err2, body) => {
+            if (err2) {
+              console.error('error getting emails', err2.message);
+              return
+            }
             const primaryEmail = body.find(e => e.primary).email;
             console.log('creating user with email:', primaryEmail);
             User.findOrCreate({ where: { email: primaryEmail } }).spread((user) => {
@@ -32,7 +44,7 @@ const resolvers = {
                 github_access_token_timestamp: new Date(),
               });
 
-              Session.create({ user }).then((session) => {
+              Session.create({ user_id: user.id }).then((session) => {
                 resolve({ uuid: session.uuid, user });
               });
             });

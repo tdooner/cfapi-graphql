@@ -1,14 +1,18 @@
 import { ApolloClient, HttpLink, InMemoryCache } from 'apollo-boost';
-import { ApolloProvider, Mutation } from 'react-apollo';
+import { ApolloProvider } from 'react-apollo';
 import { Route, Router } from 'react-router-dom';
 import React from 'react';
 import queryString from 'query-string';
 
 import createBrowserHistory from 'history/createBrowserHistory';
-import gql from 'graphql-tag';
 
 import HomePage from './pages/HomePage';
 import OAuthCallback from './pages/OAuthCallback';
+
+const {
+  CreateSessionComponent,
+  GetCurrentUserComponent,
+} = require('./__generated__/types');
 
 const history = createBrowserHistory();
 
@@ -28,30 +32,41 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-const createSessionMutation = gql`
-mutation CreateSession($githubCode: String) {
-  createSession(githubCode: $githubCode) {
-    uuid
-  }
-}
-`;
-
 export default function App() {
   return (
     <Router history={history}>
       <ApolloProvider client={client}>
         <Route exact path="/oauth/callback" render={props => (
-          <Mutation mutation={createSessionMutation}>
-            {(createSession, { data }) => (
-              <OAuthCallback
-                handleCodeReceived={createSession}
-                code={getCodeFromQueryString()}
-              />
-            )}
-          </Mutation>
+          <CreateSessionComponent>
+            {(createSession: (options: object) => any, { data }: { data: any }) => {
+              if (data && data.createSession) {
+                window.localStorage.setItem('sessionId', data.createSession.uuid);
+              }
+              return (
+                <OAuthCallback
+                  handleCodeReceived={createSession}
+                  code={getCodeFromQueryString()}
+                />
+              );
+            }}
+          </CreateSessionComponent>
         )} />
 
-        <Route exact path="/" component={HomePage} />
+        <Route exact path="/" render={(props) => {
+          const sessionId = window.localStorage.getItem('sessionId');
+          console.log('sessionId', sessionId);
+          let currentUser;
+          if (sessionId) {
+            return (
+              <GetCurrentUserComponent variables={{ sessionId }}>
+                {({ loading, error, data }: { loading: any, error: any, data: any }) =>
+                  <HomePage {...props} user={data && data.currentUser}/>}
+              </GetCurrentUserComponent>
+            );
+          } else {
+            return <HomePage {...props} user={null} />}
+          }
+        }/>
       </ApolloProvider>
     </Router>
   );

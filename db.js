@@ -28,6 +28,8 @@ const Session = db.define('session', {
     { unique: true, fields: ['uuid'] },
   ],
 });
+User.hasMany(Session);
+Session.belongsTo(User);
 
 const Brigade = db.define('brigade', {
   slug: { type: Sequelize.STRING, allowNull: false },

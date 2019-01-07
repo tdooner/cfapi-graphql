@@ -43,7 +43,7 @@ module.exports = gql`
   }
 
   type Query {
-    session: [UserSession],
+    currentUser(sessionId: String): User,
     listBrigades: [Brigade]!,
   }
 
