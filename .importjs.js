@@ -2,6 +2,7 @@ module.exports = {
   aliases: {
     gql: 'graphql-tag',
   },
+  declarationKeyword: 'import',
   namedExports: {
     react: [
       'Component',

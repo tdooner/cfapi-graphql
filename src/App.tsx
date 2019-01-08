@@ -6,13 +6,10 @@ import queryString from 'query-string';
 
 import createBrowserHistory from 'history/createBrowserHistory';
 
+import { CreateSessionComponent } from './__generated__/types';
+import { CreateUserContext } from './CurrentUserContext';
 import HomePage from './pages/HomePage';
 import OAuthCallback from './pages/OAuthCallback';
-
-const {
-  CreateSessionComponent,
-  GetCurrentUserComponent,
-} = require('./__generated__/types');
 
 const history = createBrowserHistory();
 
@@ -32,42 +29,35 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-export default function App() {
+const App: React.SFC<{ sessionId: string | null }> = ({ sessionId }) => {
   return (
-    <Router history={history}>
-      <ApolloProvider client={client}>
-        <Route exact path="/oauth/callback" render={props => (
-          <CreateSessionComponent>
-            {(createSession: (options: object) => any, { data }: { data: any }) => {
-              if (data && data.createSession) {
-                window.localStorage.setItem('sessionId', data.createSession.uuid);
-              }
-              return (
-                <OAuthCallback
-                  handleCodeReceived={createSession}
-                  code={getCodeFromQueryString()}
-                />
-              );
-            }}
-          </CreateSessionComponent>
-        )} />
+    <ApolloProvider client={client}>
+      <Router history={history}>
+        <CreateUserContext sessionId={sessionId}>
+          <Route exact path="/oauth/callback" render={props => (
+            <CreateSessionComponent>
+              {(createSession, {data }) => {
+                /* TODO: Move this out of here, ideally into CurrentUserContext.
+                 * This needs to be github-specific since the mutation only works for github. */
+                if (data && data.createSession) {
+                  window.localStorage.setItem('sessionId', data.createSession.uuid || '');
+                  window.location.href = '/';
+                }
+                return (
+                  <OAuthCallback
+                    handleCodeReceived={createSession}
+                    code={getCodeFromQueryString()}
+                  />
+                );
+              }}
+            </CreateSessionComponent>
+          )} />
 
-        <Route exact path="/" render={(props) => {
-          const sessionId = window.localStorage.getItem('sessionId');
-          console.log('sessionId', sessionId);
-          let currentUser;
-          if (sessionId) {
-            return (
-              <GetCurrentUserComponent variables={{ sessionId }}>
-                {({ loading, error, data }: { loading: any, error: any, data: any }) =>
-                  <HomePage {...props} user={data && data.currentUser}/>}
-              </GetCurrentUserComponent>
-            );
-          } else {
-            return <HomePage {...props} user={null} />}
-          }
-        }/>
-      </ApolloProvider>
-    </Router>
+          <Route exact path="/" component={HomePage} />
+        </CreateUserContext>
+      </Router>
+    </ApolloProvider>
   );
 };
+
+export default App;

@@ -1,7 +1,8 @@
 import ClientOAuth2 from 'client-oauth2';
 import React, { Component } from 'react';
 
-const { ListBrigadesComponent } = require('../__generated__/types');
+import { ListBrigadesComponent } from '../__generated__/types';
+import { UserContext } from '../CurrentUserContext';
 
 const githubAuth = new ClientOAuth2({
   clientId: '910420dba3f7db2cc4e0',
@@ -10,9 +11,7 @@ const githubAuth = new ClientOAuth2({
   scopes: ['user:email'],
 });
 
-class HomePage extends Component<{
-  user: any // TODO: Use GetCurrentUserCurrentUser here somehow???
-}>{
+class HomePage extends Component{
   handleLoginClick() {
     window.location.href = githubAuth.token.getUri();
   }
@@ -20,15 +19,18 @@ class HomePage extends Component<{
   render() {
     return (
       <div className="App">
-        {this.props.user ?
-          <div>Logged in as {this.props.user.email}</div> :
-          <a href='#' onClick={this.handleLoginClick}>Log in with oauth</a>}
+        <UserContext.Consumer>
+          {({ user, handleLogout }) => (
+            user ?
+              <div>{user.email} <a onClick={handleLogout} href='#'>log out</a></div> :
+              <a href='#' onClick={this.handleLoginClick}>log in with github</a>
+          )}
+        </UserContext.Consumer>
 
         <h1>Brigade List</h1>
 
         <ListBrigadesComponent>
-          {/* TODO: This used to work, why did it break?????? */}
-          {({ loading, error, data }: { loading: any, error: any, data: any }) => {
+          {({ loading, error, data }) => {
             if (loading) return 'Loading...';
             if (error) return 'Error: ' + error;
             if (!data) {
