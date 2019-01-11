@@ -3,10 +3,16 @@
  */
 const { Sequelize } = require('sequelize');
 
-const db = new Sequelize('cfapi-graphql', null, null, {
-  dialect: 'sqlite',
-  storage: 'cfapi-graphql.sqlite3',
-});
+let db;
+
+if (process.env.DATABASE_URL) {
+  db = new Sequelize(process.env.DATABASE_URL);
+} else {
+  db = new Sequelize('cfapi-graphql', null, null, {
+    dialect: 'sqlite',
+    storage: 'cfapi-graphql.sqlite3',
+  });
+}
 
 const User = db.define('user', {
   // TODO: Store non-primary email addresses in here too!
