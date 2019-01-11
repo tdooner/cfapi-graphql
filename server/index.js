@@ -63,7 +63,9 @@ const server = new ApolloServer({ typeDefs: graphqlApiDefinition, resolvers });
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
 db.sync().then(() => {
-  server.listen().then(({ url }) => {
+  const port = process.env.PORT || 4000;
+
+  server.listen(port).then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
   });
 });
