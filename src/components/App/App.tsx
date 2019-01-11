@@ -1,15 +1,16 @@
 import { ApolloClient, HttpLink, InMemoryCache } from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
 import { Route, Router } from 'react-router-dom';
+import { setContext } from 'apollo-link-context';
 import React from 'react';
 import queryString from 'query-string';
 
 import createBrowserHistory from 'history/createBrowserHistory';
 
-import { CreateSessionComponent } from './__generated__/types';
-import { CreateUserContext } from './CurrentUserContext';
-import HomePage from './pages/HomePage';
-import OAuthCallback from './pages/OAuthCallback';
+import { CreateSessionComponent } from '../../__generated__/types';
+import { CreateUserContext } from '../../CurrentUserContext';
+import HomePage from '../../pages/HomePage';
+import OAuthCallback from '../../pages/OAuthCallback';
 
 const history = createBrowserHistory();
 
@@ -23,6 +24,17 @@ const getCodeFromQueryString = () => {
     return parsed.code;
   }
 };
+
+
+const authLink = setContext((_, { headers }) => {
+  const sessionId = window.localStorage.getItem('sessionId');
+  return {
+    headers: {
+      ...headers,
+      authorization: sessionId ? `Bearer ${sessionId}` : '',
+    },
+  };
+});
 
 const client = new ApolloClient({
   link: new HttpLink({ uri: 'http://localhost:4000/graphql' }),
