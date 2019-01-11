@@ -9,6 +9,7 @@ import createBrowserHistory from 'history/createBrowserHistory';
 
 import { CreateSessionComponent } from '../../__generated__/types';
 import { CreateUserContext } from '../../CurrentUserContext';
+import BrigadeListPage from '../../pages/BrigadeListPage';
 import HomePage from '../../pages/HomePage';
 import OAuthCallback from '../../pages/OAuthCallback';
 
@@ -65,6 +66,7 @@ const App: React.SFC<{ sessionId: string | null }> = ({ sessionId }) => {
             </CreateSessionComponent>
           )} />
 
+          <Route exact path="/brigades" component={BrigadeListPage} />
           <Route exact path="/" component={HomePage} />
         </CreateUserContext>
       </Router>
