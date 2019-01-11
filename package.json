@@ -41,7 +41,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "codegen": "gql-gen --config codegen.yml"
+    "codegen": "gql-gen --config codegen.yml",
+    "postinstall": "yarn run build"
   },
   "eslintConfig": {
     "extends": "react-app"

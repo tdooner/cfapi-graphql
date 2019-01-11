@@ -1,4 +1,5 @@
-# install
+# cfapi-graphql
+## install
 ```bash
 npm install -g import-js
 npm install -g apollo
