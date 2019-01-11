@@ -33,8 +33,8 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "server-production": "nodemon server/index.ts",
-    "server": "node server/index.ts",
+    "server-production": "node server/index.ts",
+    "server": "nodemon server/index.ts",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
