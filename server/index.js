@@ -1,5 +1,6 @@
-const { ApolloServer } = require('apollo-server');
+const { ApolloServer } = require('apollo-server-express');
 const github = require('octonode');
+const express = require('express');
 
 const { Brigade, Session, User, db } = require('../db');
 const graphqlApiDefinition = require('../graphql-api-definition');
@@ -58,14 +59,23 @@ const resolvers = {
 // In the most basic sense, the ApolloServer can be started
 // by passing type definitions (typeDefs) and the resolvers
 // responsible for fetching the data for those types.
+const app = express();
+
+if (process.env.NODE_ENV === 'production') {
+  app.get('/', (req, res) => {
+    res.send('Hello world!');
+  });
+}
+
 const server = new ApolloServer({ typeDefs: graphqlApiDefinition, resolvers });
+server.applyMiddleware({ app });
 
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
 db.sync().then(() => {
   const port = process.env.PORT || 4000;
 
-  server.listen(port).then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
+  app.listen(port, () => {
+    console.log(`🚀  Server ready on port ${port}!`);
   });
 });
