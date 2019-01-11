@@ -1,8 +1,14 @@
 const { ApolloServer } = require('apollo-server-express');
-const github = require('octonode');
 const express = require('express');
+const github = require('octonode');
+const schedule = require('node-schedule');
 
-const { Brigade, Session, User, db } = require('../db');
+const {
+  Brigade,
+  Session,
+  User,
+  db,
+} = require('../db');
 const graphqlApiDefinition = require('../graphql-api-definition');
 
 github.auth.config({
@@ -72,6 +78,9 @@ if (process.env.NODE_ENV === 'production') {
   app.get('/', (_, res) => res.redirect(server.graphqlPath));
 }
 
+schedule.scheduleJob('* * * * *', function() {
+  console.log('minute!');
+});
 
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
