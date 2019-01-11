@@ -23,6 +23,7 @@
     "graphql-codegen-typescript-react-apollo": "^0.15.2",
     "node-sass": "^4.11.0",
     "octonode": "^0.9.5",
+    "pg": "^7.7.1",
     "query-string": "^6.2.0",
     "react": "^16.7.0",
     "react-apollo": "^2.3.3",
